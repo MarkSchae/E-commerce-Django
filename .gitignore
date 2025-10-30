@@ -1,0 +1,67 @@
+# ==========================
+# Python / Django
+# ==========================
+
+# Python cache / compiled files
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pyc
+
+# Virtual environments
+venv/
+env/
+*.venv/
+.venv/
+
+# Django
+*.sqlite3           # default dev database
+db.sqlite3
+/media/              # user uploaded files
+/staticfiles/        # collectstatic output (if using collectstatic)
+local_settings.py    # optional: if you have local settings
+
+# Django migrations (optional, sometimes you commit these)
+*/migrations/*.py
+!*/migrations/__init__.py
+
+# Logs
+*.log
+*.out
+
+# ==========================
+# IDEs / Editors
+# ==========================
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+*.swp
+
+# ==========================
+# Node / Frontend (if used)
+# ==========================
+node_modules/
+dist/
+build/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ==========================
+# Environment / Secrets
+# ==========================
+.env
+*.env
+.env.local
+*.local
+.DS_Store          # macOS file metadata
+Thumbs.db          # Windows file metadata
+
+# ==========================
+# Python packaging / pip
+# ==========================
+*.egg-info/
+*.egg
+*.whl

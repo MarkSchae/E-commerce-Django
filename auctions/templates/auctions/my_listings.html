@@ -1,0 +1,99 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+    <h2>View my Listings</h2>
+    
+    
+    <!-- ========== user created listings ========== -->
+    {% for listing in user_listings %}
+        {{ listing.item }}
+        <button class="close-auction-btn" data-listing-id="{{ listing.id }}">Close Auction</button>
+    {% endfor %}
+
+    <!-- ========== listings that the user has bid on ========== -->
+    <h2>My Active Bids</h2>
+    {% for listing in user_bid_listings %}
+        Listing Title: {{ listing.item }} Item start price: {{ listing.price }}
+    {% empty %}
+        <li>No Active bids</li>
+    {% endfor %}
+    <br></br>
+    {% for bid in user_listing_bids %}
+        My current bid: {{ bid }}
+    {% empty %}
+        <li>No Active bids</li>
+    {% endfor %}
+
+    <a href="{% url 'index' %}">Home</a>
+
+    <!-- ========== <li id="message">No Message</li> ========== -->
+    
+    <script>
+        // Get the CSRF token for the ajax request
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    // Does this cookie string begin with the name we want?
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+            }
+
+        
+        // Get all the close auction buttons
+        var closeButtons = document.getElementsByClassName("close-auction-btn");
+        
+        // Attach event listeners to each close auction button
+        Array.from(closeButtons).forEach(function(button) {
+            button.addEventListener("click", function() {
+                closeAuction(button);
+            });
+        });
+        
+        function closeAuction(button) {
+            var listingId = button.getAttribute('data-listing-id');
+            const csrftoken = getCookie('csrftoken');
+    
+            var xhr = new XMLHttpRequest();
+            var url = "{% url 'close_auction' listing_id='0' %}".replace('0', listingId);
+            xhr.open("POST", url, true);
+            xhr.setRequestHeader('Content-Type', 'application/json');
+            xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+            // Include the CSRF token in the request headers
+            xhr.setRequestHeader("X-CSRFToken", csrftoken);
+            xhr.onload = function() {
+                if (xhr.status === 200) {
+                    var response = JSON.parse(xhr.responseText);
+                    if (response.success) {
+                        //if (response.is_winner) {
+                            // User is the winner, display a message
+                            //document.getElementById('message').innerHTML = response.message;
+                        //} else {
+                            // User is not the winner, display a different message
+                            //document.getElementById('message').innerHTML = response.message;
+                        //}
+                        // Auction closed successfully, perform desired actions
+                        button.innerHTML = "Success";
+                        // For example, you can remove the button after closing the auction
+                        button.parentNode.removeChild(button);
+                    } else {
+                        // Auction closure failed, handle the error
+                        button.innerHTML = "No bids";
+                    }
+                }
+            };
+    
+            xhr.send(JSON.stringify({
+                listing_id: listingId
+            }));
+        }
+    </script>
+        
+{% endblock %}

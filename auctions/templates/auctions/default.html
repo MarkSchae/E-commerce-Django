@@ -1,0 +1,25 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+
+<h2>Active Listings</h2>
+    
+<ul>
+    {% for bid, listing in zipped %}
+        
+        <li>
+            <a href="{% url 'listing_page' listing.id %}">
+                {{ listing.item }}
+            </a>
+            <img src="{{listing.image.url}}" alt="Why?" width="400" height="auto">
+            <img src="{{listing.image_url}}" alt="Why?" width="400" height="auto">
+            Starting price: {{ listing.price }}
+            Current bid: {{ bid.current_bid }}
+            Description: {{ listing.description }}
+        </li>
+    {% empty %}
+        <li>No Active Listings</li>
+    {% endfor %}
+</ul>
+
+{% endblock %}

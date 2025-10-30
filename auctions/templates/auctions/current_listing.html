@@ -1,0 +1,120 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+    <h2>Listing I clicked on</h2>
+    {{ listings.item }}
+    {{ listings.id }}
+    {{ error_message }}
+    <!-- ========== Form for adding a new bid to a listing item ========== -->
+    <form action="{% url 'listing_page' listings.id %}" method="post">
+        {% csrf_token %}
+        {{ form }}
+        <input type="submit">
+    </form>
+
+    <!-- ========== button for adding comment ========== -->
+
+    <div>
+        <p>You must be signed in to submitt a comment or add a item to your watchlist</p>
+        <textarea id="commentText" placeholder="Add a comment"></textarea>
+        <button id="addCommentBtn">Submitt Comment</button>
+    </div>
+
+    <!-- ========== button for adding item to watchlist ========== -->
+
+    <!--<textarea id="addWatchlist" placeholder="Add to Watchlist"></textarea> could add a place to save how much the product was when viewed-->
+    <div>
+        <!--<textarea id="addWatchlist" placeholder="Add to Watchlist"></textarea> could add a place to save how much the product was when viewed-->
+        <button id="addWatchlistBtn" class="{% if listings in request.user.watchlist_item.all %}watchlisted{% else %}not-watchlisted{% endif %}">
+            {% if listings in request.user.watchlist_item.all %}Remove from Watchlist{% else %}Add to Watchlist{% endif %}
+        </button>
+    </div>
+    
+    <!-- ========== display comments ========== -->
+
+    {% for comment in comments %}
+        <ul id="commentList">
+            <li>
+                {{ comment.comment }}
+            </li>
+        </ul>
+    {% empty %}
+        <li>No Comments</li>
+    {% endfor %}
+
+    <a href="{% url 'index' %}">Home</a>
+    
+
+    <!-- ========== Java Script for sending AJAX request in order to save new comment ========== -->
+    <script>
+        document.getElementById("addCommentBtn").addEventListener("click", function() {
+            var commentText = document.getElementById("commentText").value;
+            var listingId = "{{ listings.id }}";
+            var csrfToken = document.querySelector('input[name="csrfmiddlewaretoken"]').value;
+    
+            // Send AJAX request
+            var xhr = new XMLHttpRequest();
+            var url = "{% url 'comment' listing_id='0' %}".replace('0', listingId);
+            xhr.open("POST", url, true);
+            xhr.setRequestHeader("Content-Type", "application/json");
+            xhr.setRequestHeader("X-Requested-With", "XMLHttpRequest");
+            // Include the CSRF token in the request headers
+            xhr.setRequestHeader("X-CSRFToken", csrfToken);
+            xhr.onload = function() {
+                if (xhr.status === 200) {
+                    var response = JSON.parse(xhr.responseText);
+                    if (response.success) {
+                        // Comment added successfully, update the comment list
+                        var newCommentLi = document.createElement("li");
+                        newCommentLi.textContent = response.comment_text;
+                        document.getElementById("commentList").appendChild(newCommentLi);
+    
+                        // Clear the textarea content after successful submission
+                        document.getElementById("commentText").value = "";
+                    } else {
+                        // Comment addition failed, handle the error
+                    }
+                }
+            };
+            xhr.send(JSON.stringify({
+                listing_id: listingId,
+                comment_text: commentText
+            }));
+        });
+    </script>
+    
+
+
+    <!-- ========== Java Script for sending AJAX request in order to save new watchlist item ========== -->
+    <script>
+        document.getElementById("addWatchlistBtn").addEventListener("click", function() {
+            //var addWatchlist = document.getElementById("addWatchlist").value;
+            var listingId = "{{ listings.id }}";
+            var csrfToken = document.querySelector('input[name="csrfmiddlewaretoken"]').value;
+            // Send AJAX request
+            var xhr = new XMLHttpRequest();
+            var url = "{% url 'add_watchlist' listing_id='0' %}".replace('0', listingId);
+            xhr.open("POST", url, true);
+            xhr.setRequestHeader("Content-Type", "application/json");
+            xhr.setRequestHeader("X-Requested-With", "XMLHttpRequest");
+            // Include the CSRF token in the request headers
+            xhr.setRequestHeader("X-CSRFToken", csrfToken);
+            xhr.onload = function() {
+                if (xhr.status === 200) {
+                    var response = JSON.parse(xhr.responseText);
+                    if (response.success) {
+                        // Comment added successfully, perform any desired actions
+                        document.getElementById("addWatchlistBtn").style.backgroundColor = "pink" //This works but can use the CSS class to achive it better 
+                        // document.getElementById("addWatchlistBtn").innerHTML = "Remove from Watchlist" button text must change based on whether or not the item has been watchlisted yet
+                    } else {
+                        // Comment addition failed, handle the error
+                    }
+                }
+            };
+            xhr.send(JSON.stringify({
+                listing_id: listingId,
+                //addWatchlist: addWatchlist
+            }));
+        });
+    </script>
+{% endblock %}
